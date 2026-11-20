@@ -1,8 +1,8 @@
-package com.taski.taski_api.controller;
+package com.taski.taski_api.features.task.controller;
 
 import com.taski.taski_api.generated.api.TasksApi;
 import com.taski.taski_api.generated.model.TaskResponse;
-import com.taski.taski_api.service.tasks.TaskService;
+import com.taski.taski_api.features.task.service.TaskService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 

@@ -1,4 +1,4 @@
-package com.taski.taski_api.service.users;
+package com.taski.taski_api.features.user.service;
 
 import com.taski.taski_api.generated.model.UserRequest;
 import com.taski.taski_api.generated.model.UserResponse;

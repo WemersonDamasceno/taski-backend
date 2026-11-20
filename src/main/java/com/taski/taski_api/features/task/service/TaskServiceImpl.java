@@ -1,5 +1,5 @@
 
-package com.taski.taski_api.service.tasks;
+package com.taski.taski_api.features.task.service;
 
 import com.taski.taski_api.generated.model.TaskResponse;
 import org.springframework.stereotype.Service;

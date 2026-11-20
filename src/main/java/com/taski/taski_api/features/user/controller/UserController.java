@@ -1,10 +1,10 @@
 
-package com.taski.taski_api.controller;
+package com.taski.taski_api.features.user.controller;
 
 import com.taski.taski_api.generated.api.UsersApi;
 import com.taski.taski_api.generated.model.UserRequest;
 import com.taski.taski_api.generated.model.UserResponse;
-import com.taski.taski_api.service.users.UserService;
+import com.taski.taski_api.features.user.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
