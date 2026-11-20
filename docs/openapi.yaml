@@ -1,14 +1,20 @@
-
 openapi: 3.0.3
 
 info:
   title: Taski API
   version: 1.0.0
-  description: API de gerenciamento de tarefas
+  description: |
+    API REST para gerenciamento de usuários e tarefas.
+    
+    A Taski API permite cadastrar usuários, consultar usuários por profissão
+    e recuperar as tarefas associadas a um usuário.
 
 tags:
   - name: Users
-    description: Gerenciamento de usuários
+    description: Operações relacionadas ao gerenciamento de usuários.
+
+  - name: Tasks
+    description: Operações relacionadas à consulta de tarefas.
 
 paths:
   /api/users:
@@ -16,86 +22,103 @@ paths:
       tags:
         - Users
       operationId: createUser
-      summary: Cadastra um novo usuário
+      summary: Cadastrar usuário
+      description: Cadastra um novo usuário na plataforma.
       requestBody:
         required: true
-        description: Dados do usuário que será cadastrado
+        description: Dados necessários para cadastrar um usuário.
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/UserRequest"
             example:
-              name: "Wemerson"
-              email: "wemerson@email.com"
-              age: 29
-              job: "Desenvolvedor"
-              birthDate: "1997-02-17"
+              name: "Ana Costa"
+              email: "ana.costa@example.com"
+              age: 28
+              job: "Desenvolvedora"
+              birthDate: "1998-03-15"
       responses:
         "201":
-          description: "Usuário cadastrado com sucesso"
+          description: Usuário cadastrado com sucesso.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserResponse"
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440001"
+                name: "Ana Costa"
+                email: "ana.costa@example.com"
+                age: 28
+                job: "Desenvolvedora"
+                birthDate: "1998-03-15"
 
-        "500":
-          description: "Erro interno no servidor"
+        "400":
+          description: Requisição inválida. Verifique os dados enviados.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: "O campo name deve possuir pelo menos 3 caracteres."
+                statusCode: 400
 
-        '400':
-          description: "Dados inválidos"
+        "500":
+          description: Erro interno ao processar o cadastro.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: "Ocorreu um erro interno no servidor."
+                statusCode: 500
 
     get:
       tags:
         - Users
       operationId: getUsersByJob
-      summary: Retorna uma lista de usuários com base na profissão
+      summary: Consultar usuários por profissão
+      description: Retorna todos os usuários cadastrados que correspondem à profissão informada.
       parameters:
         - name: job
           in: query
           required: true
-          description: Profissão dos usuários
+          description: Profissão utilizada como critério de busca.
           schema:
             type: string
-          example: Dentista
-
+            minLength: 2
+            example: "Dentista"
       responses:
-        '200':
-          description: Lista de usuários encontrada
+        "200":
+          description: Consulta realizada com sucesso.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/UserResponse'
+                  $ref: "#/components/schemas/UserResponse"
               example:
-                - name: "Wemerson"
-                  email: "wemerson@email.com"
-                  age: 29
+                - id: "550e8400-e29b-41d4-a716-446655440001"
+                  name: "Ana Costa"
+                  email: "ana.costa@example.com"
+                  age: 28
                   job: "Dentista"
-                  birthDate: "1997-02-17"
+                  birthDate: "1998-03-15"
 
-                - name: "João"
-                  email: "joao@email.com"
-                  age: 32
+                - id: "550e8400-e29b-41d4-a716-446655440002"
+                  name: "Carlos Oliveira"
+                  email: "carlos.oliveira@example.com"
+                  age: 35
                   job: "Dentista"
-                  birthDate: "1994-05-10"
+                  birthDate: "1991-07-22"
 
-        '400':
-          description: Parâmetro job não informado
+        "400":
+          description: Parâmetro de consulta inválido ou não informado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
-                message: "O parâmetro job é obrigatório"
+                message: "O parâmetro job é obrigatório."
                 statusCode: 400
 
   /api/tasks/{userId}:
@@ -103,19 +126,20 @@ paths:
       tags:
         - Tasks
       operationId: getTasks
-      summary: Retorna uma lista de tasks com base no userId
+      summary: Consultar tarefas de um usuário
+      description: Retorna todas as tarefas associadas ao identificador do usuário informado.
       parameters:
         - name: userId
           in: path
           required: true
-          description: "id do usuário"
+          description: Identificador único (UUID) do usuário proprietário das tarefas.
           schema:
             type: string
             format: uuid
-          example: "550e8400-e29b-41d4-a716-446655440000"
+          example: "550e8400-e29b-41d4-a716-446655440001"
       responses:
         "200":
-          description: 'Tasks retornadas com sucesso'
+          description: Consulta realizada com sucesso. A lista pode estar vazia caso o usuário não possua tarefas.
           content:
             application/json:
               schema:
@@ -123,102 +147,88 @@ paths:
                 items:
                   $ref: "#/components/schemas/TaskResponse"
               example:
-                - title: "Limpar a casa"
-                  description: "Lavar a casa com sabão próprio"
-                  id: "550e8400-e29b-41d4-a716-446655440000"
+                - id: "660e8400-e29b-41d4-a716-446655440001"
+                  title: "Limpar a casa"
+                  description: "Lavar a casa com sabão próprio."
                   priority: "ALTA"
-                  idOwner: "550e8400-e29b-41d4-a716-446655440000"
+                  idOwner: "550e8400-e29b-41d4-a716-446655440001"
                   createdAt: "2026-11-20T10:30:00Z"
 
-                - title: "Jogar videogame"
-                  id: "550e8400-e29b-41d4-a716-446655440000"
+                - id: "660e8400-e29b-41d4-a716-446655440002"
+                  title: "Jogar videogame"
+                  description: "Jogar por pelo menos uma hora."
                   priority: "BAIXA"
-                  idOwner: "550e8400-e29b-41d4-a716-446655440000"
+                  idOwner: "550e8400-e29b-41d4-a716-446655440001"
                   createdAt: "2026-11-20T11:30:00Z"
+
         "404":
-            description: Usuário não encontrado
+          description: Usuário não encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: "Não foi encontrado um usuário com o ID informado."
+                statusCode: 404
 
-
-
+        "400":
+          description: Identificador do usuário inválido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: "O identificador informado não é um UUID válido."
+                statusCode: 400
 
 components:
   schemas:
-    TaskResponse:
-      required:
-        - title
-        - priority
-      type:
-        object
-      properties:
-        id:
-          type: string
-          format: uuid
-          example: "550e8400-e29b-41d4-a716-446655440000"
-        title:
-          type: string
-          example: "Lavar casa inteira"
-          minLength: 3
-          maxLength: 30
-        description:
-          type: string
-          minLength: 3
-          maxLength: 30
-        priority:
-          type: string
-          enum:
-            - ALTA
-            - MEDIA
-            - BAIXA
-          example: ALTA
-        idOwner:
-          type: string
-          format: uuid
-          example: "550e8400-e29b-41d4-a716-446655440000"
-
-
     UserRequest:
+      type: object
+      description: Dados necessários para cadastrar um usuário.
       required:
         - name
         - email
         - age
         - job
-      type: object
       properties:
         name:
           type: string
-          example: "Wemerson"
+          description: Nome completo do usuário.
           minLength: 3
-          maxLength: 30
+          maxLength: 100
+          example: "Ana Costa"
+
         email:
           type: string
-          example: "wemerson@email.com"
           format: email
+          description: Endereço de e-mail do usuário.
+          example: "ana.costa@example.com"
+
         age:
           type: integer
-          example: 29
-          minLength: 0
+          format: int32
+          minimum: 0
           maximum: 120
+          description: Idade do usuário em anos.
+          example: 28
+
         job:
           type: string
-          example: "Desenvolvedor"
-          minimum: 2
+          minLength: 2
+          maxLength: 100
+          description: Profissão do usuário.
+          example: "Desenvolvedora"
+
         birthDate:
           type: string
           format: date
-          example: "1997-02-17"
-
-    ErrorResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          example: "Não ta rolando..."
-        statusCode:
-          type: integer
-          example: 400
+          description: Data de nascimento do usuário.
+          example: "1998-03-15"
 
     UserResponse:
       type: object
+      description: Dados retornados após a consulta de um usuário.
       required:
         - id
         - name
@@ -229,20 +239,101 @@ components:
         id:
           type: string
           format: uuid
-          example: "550e8400-e29b-41d4-a716-446655440000"
+          description: Identificador único do usuário.
+          example: "550e8400-e29b-41d4-a716-446655440001"
+
         name:
           type: string
-          example: "Fulano"
+          description: Nome completo do usuário.
+          example: "Ana Costa"
+
         email:
           type: string
-          example: "fulano@email.com"
+          format: email
+          description: Endereço de e-mail do usuário.
+          example: "ana.costa@example.com"
+
         age:
           type: integer
-          example: 29
+          format: int32
+          description: Idade do usuário em anos.
+          example: 28
+
         job:
           type: string
-          example: "Dentista"
+          description: Profissão do usuário.
+          example: "Desenvolvedora"
+
         birthDate:
           type: string
           format: date
-          example: "1997-02-17"
+          description: Data de nascimento do usuário.
+          example: "1998-03-15"
+
+    TaskResponse:
+      type: object
+      description: Dados de uma tarefa cadastrada na plataforma.
+      required:
+        - id
+        - title
+        - priority
+        - createdAt
+        - idOwner
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Identificador único da tarefa.
+          example: "660e8400-e29b-41d4-a716-446655440001"
+
+        title:
+          type: string
+          minLength: 3
+          maxLength: 100
+          description: Título da tarefa.
+          example: "Limpar a casa"
+
+        description:
+          type: string
+          maxLength: 500
+          description: Descrição detalhada da tarefa.
+          example: "Lavar a casa com sabão próprio."
+
+        priority:
+          type: string
+          description: Nível de prioridade da tarefa.
+          enum:
+            - ALTA
+            - MEDIA
+            - BAIXA
+          example: ALTA
+
+        idOwner:
+          type: string
+          format: uuid
+          description: Identificador do usuário proprietário da tarefa.
+          example: "550e8400-e29b-41d4-a716-446655440001"
+
+        createdAt:
+          type: string
+          format: date-time
+          description: Data e horário de criação da tarefa.
+          example: "2026-11-20T10:30:00Z"
+
+    ErrorResponse:
+      type: object
+      description: Estrutura padrão de resposta para erros da API.
+      required:
+        - message
+        - statusCode
+      properties:
+        message:
+          type: string
+          description: Descrição do erro ocorrido.
+          example: "Ocorreu um erro ao processar a requisição."
+
+        statusCode:
+          type: integer
+          format: int32
+          description: Código HTTP correspondente ao erro.
+          example: 400

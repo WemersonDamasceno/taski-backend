@@ -21,5 +21,4 @@ public class TaskController implements TasksApi {
         List<TaskResponse> response = service.getTasks(userID);
         return ResponseEntity.ok(response);
     }
-
 }
