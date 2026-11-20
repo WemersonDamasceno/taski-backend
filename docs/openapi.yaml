@@ -1,0 +1,248 @@
+
+openapi: 3.0.3
+
+info:
+  title: Taski API
+  version: 1.0.0
+  description: API de gerenciamento de tarefas
+
+tags:
+  - name: Users
+    description: Gerenciamento de usuários
+
+paths:
+  /api/users:
+    post:
+      tags:
+        - Users
+      operationId: createUser
+      summary: Cadastra um novo usuário
+      requestBody:
+        required: true
+        description: Dados do usuário que será cadastrado
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRequest"
+            example:
+              name: "Wemerson"
+              email: "wemerson@email.com"
+              age: 29
+              job: "Desenvolvedor"
+              birthDate: "1997-02-17"
+      responses:
+        "201":
+          description: "Usuário cadastrado com sucesso"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+
+        "500":
+          description: "Erro interno no servidor"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+        '400':
+          description: "Dados inválidos"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags:
+        - Users
+      operationId: getUsersByJob
+      summary: Retorna uma lista de usuários com base na profissão
+      parameters:
+        - name: job
+          in: query
+          required: true
+          description: Profissão dos usuários
+          schema:
+            type: string
+          example: Dentista
+
+      responses:
+        '200':
+          description: Lista de usuários encontrada
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponse'
+              example:
+                - name: "Wemerson"
+                  email: "wemerson@email.com"
+                  age: 29
+                  job: "Dentista"
+                  birthDate: "1997-02-17"
+
+                - name: "João"
+                  email: "joao@email.com"
+                  age: 32
+                  job: "Dentista"
+                  birthDate: "1994-05-10"
+
+        '400':
+          description: Parâmetro job não informado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "O parâmetro job é obrigatório"
+                statusCode: 400
+
+  /api/tasks/{userId}:
+    get:
+      tags:
+        - Tasks
+      operationId: getTasks
+      summary: Retorna uma lista de tasks com base no userId
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: "id do usuário"
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        "200":
+          description: 'Tasks retornadas com sucesso'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TaskResponse"
+              example:
+                - title: "Limpar a casa"
+                  description: "Lavar a casa com sabão próprio"
+                  id: "550e8400-e29b-41d4-a716-446655440000"
+                  priority: "ALTA"
+                  idOwner: "550e8400-e29b-41d4-a716-446655440000"
+                  createdAt: "2026-11-20T10:30:00Z"
+
+                - title: "Jogar videogame"
+                  id: "550e8400-e29b-41d4-a716-446655440000"
+                  priority: "BAIXA"
+                  idOwner: "550e8400-e29b-41d4-a716-446655440000"
+                  createdAt: "2026-11-20T11:30:00Z"
+        "404":
+            description: Usuário não encontrado
+
+
+
+
+components:
+  schemas:
+    TaskResponse:
+      required:
+        - title
+        - priority
+      type:
+        object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        title:
+          type: string
+          example: "Lavar casa inteira"
+          minLength: 3
+          maxLength: 30
+        description:
+          type: string
+          minLength: 3
+          maxLength: 30
+        priority:
+          type: string
+          enum:
+            - ALTA
+            - MEDIA
+            - BAIXA
+          example: ALTA
+        idOwner:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+
+
+    UserRequest:
+      required:
+        - name
+        - email
+        - age
+        - job
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Wemerson"
+          minLength: 3
+          maxLength: 30
+        email:
+          type: string
+          example: "wemerson@email.com"
+          format: email
+        age:
+          type: integer
+          example: 29
+          minLength: 0
+          maximum: 120
+        job:
+          type: string
+          example: "Desenvolvedor"
+          minimum: 2
+        birthDate:
+          type: string
+          format: date
+          example: "1997-02-17"
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Não ta rolando..."
+        statusCode:
+          type: integer
+          example: 400
+
+    UserResponse:
+      type: object
+      required:
+        - id
+        - name
+        - email
+        - age
+        - job
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        name:
+          type: string
+          example: "Fulano"
+        email:
+          type: string
+          example: "fulano@email.com"
+        age:
+          type: integer
+          example: 29
+        job:
+          type: string
+          example: "Dentista"
+        birthDate:
+          type: string
+          format: date
+          example: "1997-02-17"
