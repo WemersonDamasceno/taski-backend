@@ -183,6 +183,47 @@ paths:
 
 components:
   schemas:
+
+    AuthResponse:
+      type: object
+      description: Objeto que representa a resposta de autenticação de um usuário
+      required:
+        - accessToken
+        - tokenType
+        - expiresIn
+      properties:
+        accessToken:
+          type: string
+          description: Token JWT utilizado para autenticar requisições aos endpoints protegidos
+          example: eyJhbGciOiJIUzI1NiJ9.example.signature
+        tokenType:
+          type: string
+          description: Tipo de autenticação utilizado pelo token
+          example: Bearer
+        expiresIn:
+          type: integer
+          format: int64
+          description: Tempo de validade do token em segundos
+          example: 3600
+
+    AuthRequest:
+      type: object
+      description:  Dados necessários para autenticar um usuário
+      required:
+        - password
+        - email
+      properties:
+        password:
+          type: string
+          minLength: 6
+          description: Senha utilizada para autenticação
+          example: senha123
+        email:
+          type: string
+          format: email
+          description:  Endereço de e-mail cadastrado do usuário
+          example: teste@email.com
+
     UserRequest:
       type: object
       description: Dados necessários para cadastrar um usuário.
