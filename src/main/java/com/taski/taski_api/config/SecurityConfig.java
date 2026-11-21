@@ -23,7 +23,8 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.POST,
-                                "/api/users"
+                                "/api/users",
+                                "/api/auth/login"
                         ).permitAll()
                         .anyRequest().authenticated()
                 );

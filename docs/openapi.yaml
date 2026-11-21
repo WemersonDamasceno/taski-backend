@@ -17,6 +17,33 @@ tags:
     description: Operações relacionadas à consulta de tarefas.
 
 paths:
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      operationId: login
+      summary: Autenticar usuário
+      description: Autentica um usuário na plataforma e retorna um token de acesso.
+      requestBody:
+        required: true
+        description: Dados necessários para autenticação
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthRequest"
+            example:
+              email: "ana.costa@example.com"
+              password: "password123"
+      responses:
+        '200':
+          description: Autenticação realizada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Credenciais inválidas
+
   /api/users:
     post:
       tags:
