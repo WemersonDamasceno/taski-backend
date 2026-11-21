@@ -1,50 +1,65 @@
+
 package com.taski.taski_api.features.user.service;
 
+import com.taski.taski_api.features.user.entity.User;
+import com.taski.taski_api.features.user.repository.UserRepository;
 import com.taski.taski_api.generated.model.UserRequest;
 import com.taski.taski_api.generated.model.UserResponse;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
 
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public UserServiceImpl(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder
+    ) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
     @Override
     public List<UserResponse> getUsersByJob(String job) {
-        return users.stream()
-                .filter(element -> element.getJob().equals(job))
+        return userRepository.findByJob(job)
+                .stream()
+                .map(this::toResponse)
                 .toList();
     }
 
     @Override
     public UserResponse createUser(UserRequest userRequest) {
-        UserResponse userResponse = new UserResponse()
-                .id(UUID.randomUUID())
-                .name(userRequest.getName())
-                .email(userRequest.getEmail())
-                .age(userRequest.getAge())
-                .job(userRequest.getJob())
-                .birthDate(userRequest.getBirthDate());
-        users.add(userResponse);
 
-        return userResponse;
+        if (userRepository.existsByEmail(userRequest.getEmail())) {
+            throw new IllegalArgumentException("Email já cadastrado");
+        }
+
+        User user = new User();
+
+        user.setName(userRequest.getName());
+        user.setEmail(userRequest.getEmail());
+        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        user.setAge(userRequest.getAge());
+        user.setJob(userRequest.getJob());
+        user.setBirthDate(userRequest.getBirthDate());
+
+        User savedUser = userRepository.save(user);
+
+        return toResponse(savedUser);
     }
 
-    private final List<UserResponse> users = new ArrayList<>(List.of(
-            new UserResponse()
-                    .id(UUID.fromString("550e8400-e29b-41d4-a716-446655440010"))
-                    .name("Wemerson")
-                    .email("wemerson.damasceno@gmail.com")
-                    .age(29)
-                    .job("Desenvolvedor"),
-
-            new UserResponse()
-                    .id(UUID.fromString("550e8400-e29b-41d4-a716-446655440001"))
-                    .name("João")
-                    .email("joaozin@gmail.com")
-                    .age(32)
-                    .job("Dentista")
-    ));
+    private UserResponse toResponse(User user) {
+        return new UserResponse()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .age(user.getAge())
+                .job(user.getJob())
+                .birthDate(user.getBirthDate());
+    }
 }
