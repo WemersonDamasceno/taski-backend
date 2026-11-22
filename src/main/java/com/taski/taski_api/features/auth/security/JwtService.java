@@ -1,6 +1,8 @@
+
 package com.taski.taski_api.features.auth.security;
 
-
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -42,5 +45,30 @@ public class JwtService {
 
     public long getExpirationSeconds() {
         return expirationMs / 1000;
+    }
+
+    public boolean isTokenValid(String token) {
+        try {
+            extractClaims(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException exception) {
+            return false;
+        }
+    }
+
+    public String extractSubject(String token) {
+        return extractClaims(token).getSubject();
+    }
+
+    public UUID extractUserId(String token) {
+        return UUID.fromString(extractSubject(token));
+    }
+
+    private Claims extractClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }

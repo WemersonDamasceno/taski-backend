@@ -16,6 +16,9 @@ tags:
   - name: Tasks
     description: Operações relacionadas à consulta de tarefas.
 
+security:
+  - bearerAuth: []
+
 paths:
   /api/auth/login:
     post:
@@ -24,6 +27,7 @@ paths:
       operationId: login
       summary: Autenticar usuário
       description: Autentica um usuário na plataforma e retorna um token de acesso.
+      security: []
       requestBody:
         required: true
         description: Dados necessários para autenticação
@@ -51,6 +55,7 @@ paths:
       operationId: createUser
       summary: Cadastrar usuário
       description: Cadastra um novo usuário na plataforma.
+      security: []
       requestBody:
         required: true
         description: Dados necessários para cadastrar um usuário.
@@ -209,6 +214,12 @@ paths:
                 statusCode: 400
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
 
     AuthResponse:
